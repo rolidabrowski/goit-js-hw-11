@@ -10,5 +10,3 @@ export const fetchGallery = async name => {
   const response = await fetch(`${data.url}/?key=${data.key}&q=${name}`);
   return await response.json();
 };
-
-fetchGallery('cat').then(data => console.log(data));
