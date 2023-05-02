@@ -5,10 +5,11 @@ const searchParams = new URLSearchParams({
   image_type: 'photo',
   orientation: 'horizontal',
   safeSearch: true,
+  page: 1,
+  per_page: 40,
 });
 
 export const fetchGallery = async name => {
   const response = await fetch(`${API_URL}/?q=${name}&${searchParams}`);
-  console.log(response);
   return await response.json();
 };
