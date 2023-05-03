@@ -42,7 +42,7 @@ form.addEventListener('submit', async event => {
         'Sorry, there are no images matching your search query. Please try again.'
       );
     } else {
-      createGalleryList(value.data.hits);
+      loadPhtos(value.data.hits);
       Notiflix.Notify.success(
         `Hooray! We found ${value.data.totalHits} images.`
       );
@@ -90,7 +90,7 @@ function loadMorePhotos(photos) {
   photosHtmlElems.forEach(elem => photosList.append(elem));
 }
 
-function createGalleryList(photos) {
+function loadPhtos(photos) {
   const photosHtmlElems = photos.map(photo => getPhotoLayout(photo));
   const photosList = document.querySelector('.gallery');
   photosList.innerHTML = '';
