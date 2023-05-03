@@ -1,32 +1,131 @@
 import Notiflix from 'notiflix';
-import { fetchGallery } from './fetchGallery.js';
-import { createGalleryList } from './createGallery.js';
+import axios from 'axios';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const form = document.getElementById('search-form');
+const form = document.querySelector('#search-form');
+const formInputEl = document.querySelector('#search-form input');
 const loadMoreBtn = document.querySelector('.load-more');
+
+let page = 1;
+let perPage = 40;
+
+const fetchPhotos = async () => {
+  const API_URL = 'https://pixabay.com/api/';
+  const response = await axios.get(API_URL, {
+    params: {
+      key: '35294695-6bfc4b24db5372eaae3354bab',
+      image_type: 'photo',
+      orientation: 'horizontal',
+      safesearch: true,
+      q: formInputEl.value,
+      per_page: perPage,
+      page: page,
+    },
+  });
+  return response;
+};
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
+  page = 1;
 
-  const searchEl = event.currentTarget.elements.searchQuery.value;
-
-  if (searchEl === '') {
+  if (formInputEl.value === '') {
     return Notiflix.Notify.info('Enter the search phrase');
   }
 
   try {
-    const value = await fetchGallery(searchEl);
+    const value = await fetchPhotos();
 
-    if (value.hits.length === 0) {
+    if (value.data.hits.length === 0) {
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
     } else {
-      createGalleryList(value.hits);
-      Notiflix.Notify.success(`Hooray! We found ${value.totalHits} images.`);
+      createGalleryList(value.data.hits);
+      Notiflix.Notify.success(
+        `Hooray! We found ${value.data.totalHits} images.`
+      );
       loadMoreBtn.classList.remove('hidden');
+
+      let lightbox = new SimpleLightbox('.gallery a', {
+        captionsData: 'alt',
+        captionDelay: 250,
+      });
+
+      lightbox.on('show.simplelightbox');
     }
   } catch (error) {
     Notiflix.Notify.failure('Not found images for your request!');
   }
 });
+
+loadMoreBtn.addEventListener('click', async () => {
+  page += 1;
+
+  const value = await fetchPhotos();
+  const limit = value.data.totalHits - (page - 1) * perPage;
+
+  loadMorePhotos(value.data.hits);
+
+  let lightbox = new SimpleLightbox('.gallery a', {
+    captionsData: 'alt',
+    captionDelay: 250,
+  });
+
+  lightbox.on('show.simplelightbox');
+
+  if (value.data.hits.length > limit) {
+    Notiflix.Notify.info(
+      'We are sorry, but you have reached the end of search results.'
+    );
+    loadMoreBtn.classList.add('hidden');
+  }
+});
+
+function loadMorePhotos(photos) {
+  const photosHtmlElems = photos.map(photo => getPhotoLayout(photo));
+  const photosList = document.querySelector('.gallery');
+  photosList.insertAdjacentHTML = '';
+  photosHtmlElems.forEach(elem => photosList.append(elem));
+}
+
+function createGalleryList(photos) {
+  const photosHtmlElems = photos.map(photo => getPhotoLayout(photo));
+  const photosList = document.querySelector('.gallery');
+  photosList.innerHTML = '';
+  photosHtmlElems.forEach(elem => photosList.append(elem));
+}
+
+function getPhotoLayout(photo) {
+  const root = document.createElement('div');
+  root.classList.add('gallery__card');
+  root.append(getPhotoProp(photo));
+  return root;
+}
+
+function getPhotoProp(property) {
+  const prop = document.createElement('div');
+  prop.classList.add('gallery__item');
+  prop.insertAdjacentHTML(
+    'beforeend',
+    `<a class="gallery__link" href="${property['largeImageURL']}">
+            <img class="gallery__image" src="${property['webformatURL']}" alt="${property['tags']}" loading="lazy" />
+          </a>
+          <div class="info">
+            <p class="info-item">
+              <b>Likes</b>${property['likes']}
+            </p>
+            <p class="info-item">
+              <b>Views</b>${property['views']}
+            </p>
+            <p class="info-item">
+              <b>Comments</b>${property['comments']}
+            </p>
+            <p class="info-item">
+              <b>Downloads</b>${property['downloads']}
+            </p>
+            </div>`
+  );
+  return prop;
+}
