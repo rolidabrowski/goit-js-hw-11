@@ -1,11 +1,19 @@
 import Notiflix from 'notiflix';
 import axios from 'axios';
+import MoveTo from 'moveto';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector('#search-form');
 const formInputEl = document.querySelector('#search-form input');
 const loadMoreBtn = document.querySelector('.load-more');
+
+const moveTo = new MoveTo({
+  tolerance: 0,
+  duration: 10000,
+  easing: 'easeOutQuart',
+  container: window,
+});
 
 let page = 1;
 let perPage = 40;
@@ -51,6 +59,7 @@ form.addEventListener('submit', async event => {
         captionsData: 'alt',
         captionDelay: 250,
       });
+      moveTo.move(document.querySelector('.load-more'));
     }
   } catch (error) {
     Notiflix.Notify.failure('Not found images for your request!');
@@ -69,6 +78,8 @@ loadMoreBtn.addEventListener('click', async () => {
     captionsData: 'alt',
     captionDelay: 250,
   });
+
+  moveTo.move(document.querySelector('.load-more'));
 
   if (value.data.hits.length > limit) {
     Notiflix.Notify.info(
