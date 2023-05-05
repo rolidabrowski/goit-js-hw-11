@@ -47,13 +47,10 @@ form.addEventListener('submit', async event => {
         `Hooray! We found ${value.data.totalHits} images.`
       );
       loadMoreBtn.classList.remove('hidden');
-
-      let lightbox = new SimpleLightbox('.gallery a', {
+      new SimpleLightbox('.gallery a', {
         captionsData: 'alt',
         captionDelay: 250,
       });
-
-      lightbox.on('show.simplelightbox');
     }
   } catch (error) {
     Notiflix.Notify.failure('Not found images for your request!');
@@ -68,12 +65,10 @@ loadMoreBtn.addEventListener('click', async () => {
 
   loadMorePhotos(value.data.hits);
 
-  let lightbox = new SimpleLightbox('.gallery a', {
+  new SimpleLightbox('.gallery a', {
     captionsData: 'alt',
     captionDelay: 250,
   });
-
-  lightbox.on('show.simplelightbox');
 
   if (value.data.hits.length > limit) {
     Notiflix.Notify.info(
