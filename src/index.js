@@ -7,6 +7,12 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const form = document.querySelector('#search-form');
 const formInputEl = document.querySelector('#search-form input');
 const loadMoreBtn = document.querySelector('.load-more');
+const gallery = document.querySelector('.gallery');
+
+const lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
 
 const moveTo = new MoveTo({
   tolerance: 0,
@@ -27,8 +33,8 @@ const fetchPhotos = async () => {
       orientation: 'horizontal',
       safesearch: true,
       q: formInputEl.value,
-      per_page: perPage,
       page: page,
+      per_page: perPage,
     },
   });
   return response;
@@ -50,15 +56,12 @@ form.addEventListener('submit', async event => {
         'Sorry, there are no images matching your search query. Please try again.'
       );
     } else {
-      loadPhtos(value.data.hits);
+      loadPhotos(value.data.hits);
       Notiflix.Notify.success(
         `Hooray! We found ${value.data.totalHits} images.`
       );
       loadMoreBtn.classList.remove('hidden');
-      new SimpleLightbox('.gallery a', {
-        captionsData: 'alt',
-        captionDelay: 250,
-      });
+      lightbox.refresh('.gallery a');
       moveTo.move(document.querySelector('.load-more'));
     }
   } catch (error) {
@@ -72,13 +75,8 @@ loadMoreBtn.addEventListener('click', async () => {
   const value = await fetchPhotos();
   const limit = value.data.totalHits - (page - 1) * perPage;
 
-  loadMorePhotos(value.data.hits);
-
-  new SimpleLightbox('.gallery a', {
-    captionsData: 'alt',
-    captionDelay: 250,
-  });
-
+  loadPhotos(value.data.hits);
+  lightbox.refresh('.gallery a');
   moveTo.move(document.querySelector('.load-more'));
 
   if (value.data.hits.length > limit) {
@@ -89,18 +87,10 @@ loadMoreBtn.addEventListener('click', async () => {
   }
 });
 
-function loadMorePhotos(photos) {
+function loadPhotos(photos) {
   const photosHtmlElems = photos.map(photo => getPhotoLayout(photo));
-  const photosList = document.querySelector('.gallery');
-  photosList.insertAdjacentHTML = '';
-  photosHtmlElems.forEach(elem => photosList.append(elem));
-}
-
-function loadPhtos(photos) {
-  const photosHtmlElems = photos.map(photo => getPhotoLayout(photo));
-  const photosList = document.querySelector('.gallery');
-  photosList.innerHTML = '';
-  photosHtmlElems.forEach(elem => photosList.append(elem));
+  gallery.insertAdjacentHTML = '';
+  photosHtmlElems.forEach(elem => gallery.append(elem));
 }
 
 function getPhotoLayout(photo) {
