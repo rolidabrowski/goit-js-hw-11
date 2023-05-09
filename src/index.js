@@ -61,7 +61,6 @@ form.addEventListener('submit', async event => {
         `Hooray! We found ${value.data.totalHits} images.`
       );
       loadMoreBtn.classList.remove('hidden');
-      lightbox.refresh('.gallery a');
       moveTo.move(document.querySelector('.load-more'));
     }
   } catch (error) {
@@ -76,7 +75,6 @@ loadMoreBtn.addEventListener('click', async () => {
   const limit = value.data.totalHits - (page - 1) * perPage;
 
   loadPhotos(value.data.hits);
-  lightbox.refresh('.gallery a');
   moveTo.move(document.querySelector('.load-more'));
 
   if (value.data.hits.length > limit) {
@@ -91,6 +89,7 @@ function loadPhotos(photos) {
   const photosHtmlElems = photos.map(photo => getPhotoLayout(photo));
   gallery.insertAdjacentHTML = '';
   photosHtmlElems.forEach(elem => gallery.append(elem));
+  lightbox.refresh('.gallery a');
 }
 
 function getPhotoLayout(photo) {
