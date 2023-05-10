@@ -44,6 +44,8 @@ form.addEventListener('submit', async event => {
   event.preventDefault();
   page = 1;
 
+  gallery.innerHTML = '';
+
   if (formInputEl.value === '') {
     return Notiflix.Notify.info('Enter the search phrase');
   }
